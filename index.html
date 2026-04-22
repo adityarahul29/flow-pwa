@@ -627,7 +627,11 @@ async function fsGet(col) {
     const id = doc.name.split('/').pop();
     const fields = {};
     for (const [k, v] of Object.entries(doc.fields || {})) {
-      fields[k] = v.stringValue ?? v.integerValue ?? v.doubleValue ?? v.booleanValue ?? '';
+      if ('stringValue' in v) fields[k] = v.stringValue;
+      else if ('integerValue' in v) fields[k] = Number(v.integerValue);
+      else if ('doubleValue' in v) fields[k] = Number(v.doubleValue);
+      else if ('booleanValue' in v) fields[k] = v.booleanValue;
+      else fields[k] = '';
     }
     return { id, ...fields };
   });
@@ -636,7 +640,11 @@ async function fsGet(col) {
 async function fsWrite(col, id, fields) {
   const fsFields = {};
   for (const [k, v] of Object.entries(fields)) {
-    fsFields[k] = { stringValue: String(v) };
+    if (typeof v === 'number' || (!isNaN(v) && v !== '')) {
+      fsFields[k] = { integerValue: String(Math.round(Number(v))) };
+    } else {
+      fsFields[k] = { stringValue: String(v) };
+    }
   }
   const mask = Object.keys(fields).map(k => `updateMask.fieldPaths=${k}`).join('&');
   const url = id
@@ -648,6 +656,15 @@ async function fsWrite(col, id, fields) {
     body: JSON.stringify({ fields: fsFields })
   });
   return res.json();
+}
+
+function getBadge(status) {
+  if (!status) return 'pending';
+  const s = status.toLowerCase();
+  if (s.includes('progress') || s === 'active') return 'active';
+  if (s.includes('invoice')) return 'invoiced';
+  if (s === 'done' || s === 'completed') return 'done';
+  return 'pending';
 }
 
 async function fsDelete(col, id) {
@@ -885,7 +902,7 @@ function renderPanelContent() {
           </div>
           <div style="text-align:right">
             <div class="data-val">₹${parseFloat(p.pending||0).toLocaleString('en-IN')}</div>
-            <span class="badge ${p.status === 'active' ? 'active' : p.status === 'invoice sent' ? 'invoiced' : p.status === 'done' ? 'done' : 'pending'}">${p.status||'—'}</span>
+            <span class="badge ${getBadge(p.status)}">${p.status||'—'}</span>
           </div>
         </div>`).join('') || '<div class="empty">No projects</div>'}`;
 
