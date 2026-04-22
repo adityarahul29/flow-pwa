@@ -147,9 +147,9 @@
     .drawer-logout{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;color:var(--text3);font-size:12px;letter-spacing:1px}
     .drawer-logout:hover{color:var(--red)}
     /* FITNESS QUICK LOG */
-    #fitness-fab{position:fixed;bottom:88px;left:16px;z-index:20;width:48px;height:48px;background:var(--bg2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+    #fitness-fab{width:40px;height:40px;background:var(--bg2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .2s;flex-shrink:0;position:relative}
     #fitness-fab:active{transform:scale(.93)}
-    #fitness-fab .fab-ring{position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);border-right-color:var(--green);animation:spin 2s linear infinite;opacity:.5}
+    #fitness-fab .fab-ring{position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);border-right-color:var(--green);animation:spin 2s linear infinite;opacity:.4}
     .signal-tag{display:inline-block;font-size:9px;letter-spacing:1px;padding:2px 7px;background:var(--bg3);border:1px solid var(--border2);border-radius:2px;color:var(--text3);margin-right:4px;margin-top:4px}
   </style>
 </head>
@@ -183,13 +183,12 @@
     <button class="quick-btn" onclick="quickSend('Summarize this week for me')">📅 Week</button>
   </div>
   <div id="input-bar">
+    <div id="fitness-fab" onclick="openPanel('fitness')" title="Log fitness" style="position:static;width:40px;height:40px;box-shadow:none;flex-shrink:0">
+      <div class="fab-ring"></div>
+      💪
+    </div>
     <textarea id="msg-input" placeholder="Ask anything or give a command..." rows="1"></textarea>
     <button id="send-btn" onclick="sendMsg()">&#8593;</button>
-  </div>
-  <!-- FITNESS FAB -->
-  <div id="fitness-fab" onclick="openPanel('fitness')" title="Log fitness">
-    <div class="fab-ring"></div>
-    💪
   </div>
 </div>
 
@@ -216,10 +215,6 @@
         <div class="drawer-icon">◈</div>
         <div class="drawer-item-label">Projects</div>
       </div>
-      <div class="drawer-item" id="dnav-finances" onclick="drawerNav('finances')">
-        <div class="drawer-icon">₹</div>
-        <div class="drawer-item-label">Finances</div>
-      </div>
       <div class="drawer-section">Personal</div>
       <div class="drawer-item" id="dnav-fitness" onclick="drawerNav('fitness')">
         <div class="drawer-icon">◉</div>
@@ -229,10 +224,14 @@
         <div class="drawer-icon">⚡</div>
         <div class="drawer-item-label">Signal</div>
       </div>
-      <div class="drawer-section">Memory</div>
       <div class="drawer-item" id="dnav-history" onclick="drawerNav('history')">
         <div class="drawer-icon">◷</div>
         <div class="drawer-item-label">Chat History</div>
+      </div>
+      <div class="drawer-section">Finance</div>
+      <div class="drawer-item" id="dnav-finances" onclick="drawerNav('finances')">
+        <div class="drawer-icon">₹</div>
+        <div class="drawer-item-label">Finances</div>
       </div>
     </div>
     <div class="drawer-bottom">
@@ -244,7 +243,7 @@
 </div>
 <div id="panel">
   <div class="panel-header">
-    <div class="panel-title">Your Data</div>
+    <div class="panel-title" id="panel-title">Tasks</div>
     <button class="icon-btn" onclick="closePanel()">&#10005;</button>
   </div>
   <div class="panel-tabs">
@@ -452,7 +451,8 @@ function openPanel(tab){
       el.classList.toggle('active',['tasks','projects','finances','fitness','signal','history'][i]===tab);
     });
     const titles = {tasks:'Tasks',projects:'Projects',finances:'Finances',fitness:'Fitness',signal:'Signal',history:'History'};
-    document.querySelector('.panel-title').textContent = titles[tab]||'Data';
+    const titleEl = document.getElementById('panel-title');
+    if(titleEl) titleEl.textContent = titles[tab]||'Data';
   }
   document.getElementById('panel').classList.add('open');
   renderPanelContent();
@@ -504,16 +504,42 @@ function renderPanelContent(){
   const summary=fsData.finances.find(f=>f.id==='summary')||{};
 
   if(currentPTab==='tasks'){
-    const pending=fsData.tasks.filter(t=>t.status!=='done').sort((a,b)=>(a.due||'zzz').localeCompare(b.due||'zzz'));
+    const overdue=fsData.tasks.filter(t=>t.status!=='done'&&t.due&&t.due<today).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+    const dueToday=fsData.tasks.filter(t=>t.status!=='done'&&t.due===today);
+    const upcoming=fsData.tasks.filter(t=>t.status!=='done'&&t.due&&t.due>today).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+    const noDate=fsData.tasks.filter(t=>t.status!=='done'&&!t.due);
     const done=fsData.tasks.filter(t=>t.status==='done');
+    const taskRow=(t,ov=false)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer" onclick="openEditModal('task','${t.id}')">
+      <div><div style="font-size:13px;font-weight:500">${t.title||'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${t.due||''}${t.project?' · '+t.project:''}${t.priority==='high'?' · 🔴':''}</div></div>
+    </div>`;
     body.innerHTML=`<button class="panel-add-btn" onclick="openAddModal('task')">+ Add Task</button>
-      <div class="section-label">Pending (${pending.length})</div>
-      ${pending.map(t=>{const ov=t.due&&t.due<today;return`<div class="data-row" onclick="openEditModal('task','${t.id}')">
-        <div class="data-row-left"><div class="data-name">${t.title||'—'}</div>
-        <div class="data-sub" style="${ov?'color:var(--red)':''}">${t.due||'no date'}${t.project?' · '+t.project:''}${t.priority==='high'?' · high':''}</div></div>
-        <span class="badge ${ov?'high':'pending'}">${ov?'overdue':t.status||'pending'}</span></div>`;}).join('')||'<div class="empty">No pending tasks</div>'}
-      <div class="section-label">Done (${done.length})</div>
-      ${done.map(t=>`<div class="data-row" style="opacity:.4"><div class="data-name" style="text-decoration:line-through;font-size:12px">${t.title||'—'}</div></div>`).join('')}`;
+
+    ${overdue.length?`<div style="margin:8px 12px 4px;padding:10px 12px 4px;background:rgba(255,64,64,0.06);border:1px solid rgba(255,64,64,0.12);border-radius:6px">
+      <div style="font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:.8">Overdue (${overdue.length})</div>
+      ${overdue.map(t=>taskRow(t,true)).join('')}
+    </div>`:''}
+
+    ${dueToday.length?`<div style="margin:8px 12px 4px;padding:10px 12px 4px;background:rgba(200,255,0,0.05);border:1px solid rgba(200,255,0,0.1);border-radius:6px">
+      <div style="font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:.8">Today (${dueToday.length})</div>
+      ${dueToday.map(t=>taskRow(t)).join('')}
+    </div>`:''}
+
+    ${upcoming.length?`<div style="margin:8px 12px 4px;padding:10px 12px 4px;background:rgba(77,166,255,0.04);border:1px solid rgba(77,166,255,0.08);border-radius:6px">
+      <div style="font-size:9px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:.8">Upcoming (${upcoming.length})</div>
+      ${upcoming.map(t=>taskRow(t)).join('')}
+    </div>`:''}
+
+    ${noDate.length?`<div style="margin:8px 12px 4px;padding:10px 12px 4px;background:rgba(100,100,100,0.04);border:1px solid rgba(100,100,100,0.08);border-radius:6px">
+      <div style="font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">No Date (${noDate.length})</div>
+      ${noDate.map(t=>taskRow(t)).join('')}
+    </div>`:''}
+
+    ${!overdue.length&&!dueToday.length&&!upcoming.length&&!noDate.length?'<div class="empty">No pending tasks</div>':''}
+
+    ${done.length?`<div style="margin:8px 12px 16px;padding:10px 12px 4px;background:rgba(0,232,122,0.03);border:1px solid rgba(0,232,122,0.06);border-radius:6px">
+      <div style="font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:.6">Done (${done.length})</div>
+      ${done.map(t=>`<div style="padding:8px 0;border-bottom:1px solid rgba(0,232,122,0.04);font-size:12px;color:var(--text3);text-decoration:line-through">${t.title||'—'}</div>`).join('')}
+    </div>`:''}`;
 
   }else if(currentPTab==='projects'){
     const outstanding=summary.total_outstanding||0;
