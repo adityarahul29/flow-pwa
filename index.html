@@ -598,7 +598,8 @@ function greet() {
   const active = fsData.projects.filter(p => p.status === 'active').length;
   const today = new Date().toISOString().split('T')[0];
   const dueToday = fsData.tasks.filter(t => t.due === today && t.status !== 'done').length;
-  const outstanding = fsData.projects.reduce((s, p) => s + (parseFloat(p.pending) || 0), 0);
+  const summary = fsData.finances.find(f => f.id === 'summary') || {};
+  const outstanding = summary.total_outstanding || fsData.projects.reduce((s, p) => s + (parseFloat(p.pending) || 0), 0);
 
   addMsg('ai', `${greetings}, Aditya.\n\n` +
     `Here's where things stand:\n` +
@@ -934,29 +935,38 @@ function renderPanelContent() {
       </div>`).join('')}`;
 
   } else if (currentPTab === 'finances') {
-    const totalBalance = fsData.finances.filter(f=>f.type==='bank_account').reduce((s,f)=>s+(parseFloat(f.balance)||0),0);
-    const received = fsData.finances.filter(f=>f.type==='received').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
-    const expense = fsData.finances.filter(f=>f.type==='expense').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
+    const summary = fsData.finances.find(f => f.id === 'summary') || {};
+    const outstanding = summary.total_outstanding || 0;
+    const netReceivable = summary.net_receivable || 0;
+    const raashi = summary.raashi_payable || 0;
+    const bankBalance = fsData.finances.filter(f=>f.type==='bank_account').reduce((s,f)=>s+(parseFloat(f.balance)||0),0);
+
+    const banks = fsData.finances.filter(f=>f.type==='bank_account');
+    const cards = fsData.finances.filter(f=>f.type==='credit_card');
+
     body.innerHTML = `
       <div class="metrics-row">
-        <div class="metric-card"><div class="metric-val green">₹${(totalBalance/1000).toFixed(0)}k</div><div class="metric-label">Balance</div></div>
-        <div class="metric-card"><div class="metric-val yellow">₹${(received/1000).toFixed(0)}k</div><div class="metric-label">Received</div></div>
-        <div class="metric-card"><div class="metric-val red">₹${(expense/1000).toFixed(0)}k</div><div class="metric-label">Expenses</div></div>
+        <div class="metric-card"><div class="metric-val green">₹${(bankBalance/1000).toFixed(0)}k</div><div class="metric-label">Bank Balance</div></div>
+        <div class="metric-card"><div class="metric-val yellow">₹${(outstanding/1000).toFixed(0)}k</div><div class="metric-label">Outstanding</div></div>
+        <div class="metric-card"><div class="metric-val green">₹${(netReceivable/1000).toFixed(0)}k</div><div class="metric-label">Net Receivable</div></div>
       </div>
-      ${fsData.finances.map(f => {
-        const isBankAccount = f.type === 'bank_account';
-        const val = isBankAccount ? (parseFloat(f.balance)||0) : (parseFloat(f.amount)||0);
-        return `<div class="data-row">
-          <div class="data-row-left">
-            <div class="data-name">${f.name||'—'}</div>
-            <div class="data-sub">${f.bank||''}</div>
-          </div>
-          <div style="text-align:right">
-            <div class="data-val" style="color:${f.type==='expense'?'var(--red)':'var(--green)'}">₹${val.toLocaleString('en-IN')}</div>
-            <span class="badge ${isBankAccount?'active':f.type==='expense'?'overdue':'pending'}">${isBankAccount?'bank':f.type||''}</span>
-          </div>
-        </div>`;
-      }).join('') || '<div class="empty">No transactions</div>'}`;
+      ${raashi ? `<div class="data-row" style="background:rgba(255,64,64,0.05)">
+        <div class="data-row-left"><div class="data-name">Raashi Payable</div><div class="data-sub">Pay after UNDP clears</div></div>
+        <div class="data-val" style="color:var(--red)">₹${raashi.toLocaleString('en-IN')}</div>
+      </div>` : ''}
+      <div class="section-label">Bank Accounts</div>
+      ${banks.map(f => `<div class="data-row">
+        <div class="data-row-left"><div class="data-name">${f.name||'—'}</div></div>
+        <div style="text-align:right">
+          <div class="data-val" style="color:${f.balance?'var(--green)':'var(--text3)'}">₹${(f.balance||0).toLocaleString('en-IN')}</div>
+          <span class="badge active">bank</span>
+        </div>
+      </div>`).join('')}
+      <div class="section-label">Credit Cards</div>
+      ${cards.map(f => `<div class="data-row">
+        <div class="data-row-left"><div class="data-name">${f.name||'—'}</div><div class="data-sub">${f.bank||''}</div></div>
+        <span class="badge pending">card</span>
+      </div>`).join('')}`;
   }
 }
 
