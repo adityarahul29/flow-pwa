@@ -521,12 +521,7 @@ function expandSession(dateId){
     });
   }else{el.style.display='none';}
 }
-async function summariseHistory(){closePanel();const sessions=await loadChatHistory();const allMsgs=sessions.flatMap(s=>s.msgs).slice(-30);const prompt=`Summarise our recent conversations — what did we work on, decisions made, still open?
-
-${allMsgs.map(m=>`Me: ${m.user}
-Flow: ${m.ai}`).join('
-
-')}`;document.getElementById('msg-input').value=prompt;sendMsg();}
+async function summariseHistory(){closePanel();const sessions=await loadChatHistory();const allMsgs=sessions.flatMap(s=>s.msgs).slice(-30);const prompt='Summarise our recent conversations - what did we work on, decisions made, still open?\n\n'+allMsgs.map(m=>'Me: '+m.user+'\nFlow: '+m.ai).join('\n\n');document.getElementById('msg-input').value=prompt;sendMsg();}
 function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast ${type} show`;setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
