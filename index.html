@@ -215,9 +215,11 @@ function authSuccess(){
   document.getElementById('app').style.display='flex';
   boot();
 }
-document.getElementById('pin').addEventListener('keydown',e=>{if(e.key==='Enter')doAuth();});
-if(window.PublicKeyCredential){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(ok=>{if(ok)document.getElementById('faceid-btn').style.display='block';});}
-if(sessionStorage.getItem('flow-ok')){document.getElementById('auth').style.display='none';document.getElementById('app').style.display='flex';boot();}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pin').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+  if(window.PublicKeyCredential){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(ok=>{if(ok)document.getElementById('faceid-btn').style.display='block';});}
+  if(sessionStorage.getItem('flow-ok')){document.getElementById('auth').style.display='none';document.getElementById('app').style.display='flex';boot();}
+});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sessionStorage.getItem('flow-ok'))loadAll();});
 let pullStartY=0;
 document.addEventListener('touchstart',e=>{pullStartY=e.touches[0].clientY;},{passive:true});
