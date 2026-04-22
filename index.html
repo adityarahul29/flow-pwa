@@ -2,552 +2,460 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#080808" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Flow" />
-  <title>Flow — AlmostCult Labs</title>
+  <title>Flow</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0a0a0a;
-      --bg2: #111111;
-      --bg3: #1a1a1a;
-      --border: #222222;
-      --border2: #2e2e2e;
-      --text: #e8e8e8;
-      --text2: #888888;
-      --text3: #444444;
+      --bg: #080808;
+      --bg2: #101010;
+      --bg3: #181818;
+      --border: #1e1e1e;
+      --border2: #282828;
+      --text: #efefef;
+      --text2: #777;
+      --text3: #333;
       --accent: #c8ff00;
-      --accent2: #ff4d00;
-      --accent3: #00c8ff;
-      --red: #ff3b3b;
+      --accent-dim: rgba(200,255,0,0.08);
+      --red: #ff4040;
       --green: #00e87a;
+      --blue: #4da6ff;
+      --user-bubble: #161616;
+      --ai-bubble: #0e0e0e;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    body {
+    html, body {
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Mono', monospace;
       font-size: 13px;
-      min-height: 100vh;
-      overscroll-behavior: none;
     }
 
-    /* AUTH SCREEN */
-    #auth-screen {
+    /* AUTH */
+    #auth {
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       background: var(--bg);
-      z-index: 100;
-      gap: 32px;
-      padding: 32px;
+      z-index: 999;
+      gap: 0;
     }
 
-    .auth-logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 48px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      color: var(--accent);
+    .auth-wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 72px;
+      color: var(--text);
+      letter-spacing: -3px;
+      line-height: 1;
+      margin-bottom: 6px;
     }
 
     .auth-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text3);
       letter-spacing: 3px;
       text-transform: uppercase;
-      margin-top: -24px;
+      margin-bottom: 48px;
     }
 
     .auth-input {
-      width: 100%;
-      max-width: 280px;
-      background: var(--bg2);
-      border: 1px solid var(--border2);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
       color: var(--text);
       font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      padding: 14px 16px;
-      border-radius: 4px;
-      outline: none;
+      font-size: 18px;
+      padding: 12px 0;
+      width: 200px;
       text-align: center;
-      letter-spacing: 4px;
+      letter-spacing: 6px;
+      outline: none;
+      margin-bottom: 32px;
     }
 
-    .auth-input:focus { border-color: var(--accent); }
+    .auth-input::placeholder { color: var(--text3); letter-spacing: 3px; font-size: 14px; }
+    .auth-input:focus { border-bottom-color: var(--accent); }
 
     .auth-btn {
-      width: 100%;
-      max-width: 280px;
-      background: var(--accent);
-      color: #000;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 2px;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      padding: 14px;
-      border: none;
-      border-radius: 4px;
+      padding: 10px 24px;
       cursor: pointer;
+      transition: all 0.15s;
     }
 
+    .auth-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     .auth-error {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--red);
       letter-spacing: 1px;
+      margin-top: 16px;
       display: none;
     }
 
-    /* APP */
-    #app { display: none; }
+    /* MAIN LAYOUT */
+    #app {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      height: 100dvh;
+    }
 
     /* HEADER */
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
+      flex-shrink: 0;
       background: var(--bg);
-      z-index: 10;
     }
 
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
+    .wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 26px;
       letter-spacing: -1px;
-      color: var(--accent);
+      color: var(--text);
     }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .wordmark span { color: var(--accent); }
 
-    .date-tag {
-      font-size: 10px;
-      color: var(--text3);
-      letter-spacing: 1px;
-    }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
 
-    .refresh-btn {
+    .icon-btn {
       background: none;
-      border: 1px solid var(--border2);
+      border: 1px solid var(--border);
       color: var(--text2);
-      font-size: 14px;
-      width: 30px; height: 30px;
+      width: 32px; height: 32px;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
       display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
     }
 
-    .refresh-btn:active { background: var(--bg3); }
+    .icon-btn:hover { border-color: var(--border2); color: var(--text); }
+    .icon-btn:active { background: var(--bg3); }
 
-    /* NAV TABS */
-    nav {
+    .status-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* CHAT AREA */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #chat::-webkit-scrollbar { width: 2px; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border2); }
+
+    /* MESSAGES */
+    .msg {
+      margin-bottom: 20px;
+      animation: fadeUp 0.2s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-role {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: var(--text3);
+    }
+
+    .msg.user .msg-role { color: var(--accent); opacity: 0.6; }
+
+    .msg-bubble {
+      padding: 12px 14px;
+      border-radius: 2px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.user .msg-bubble {
+      background: var(--user-bubble);
+      border-left: 2px solid var(--accent);
+      color: var(--text);
+    }
+
+    .msg.ai .msg-bubble {
+      background: var(--ai-bubble);
+      border-left: 2px solid var(--border2);
+      color: var(--text);
+    }
+
+    .msg.system .msg-bubble {
+      background: transparent;
+      border-left: none;
+      color: var(--text3);
+      font-size: 11px;
+      padding: 4px 0;
+    }
+
+    /* ACTION CARDS in messages */
+    .action-card {
+      margin-top: 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    .action-card .action-title {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    /* TYPING INDICATOR */
+    .typing {
       display: flex;
-      border-bottom: 1px solid var(--border);
+      gap: 4px;
+      padding: 12px 14px;
+      background: var(--ai-bubble);
+      border-left: 2px solid var(--border2);
+      border-radius: 2px;
+      width: fit-content;
+    }
+
+    .typing span {
+      width: 4px; height: 4px;
+      background: var(--text3);
+      border-radius: 50%;
+      animation: blink 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+
+    /* QUICK PROMPTS */
+    #quick-prompts {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
       overflow-x: auto;
       scrollbar-width: none;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
     }
-    nav::-webkit-scrollbar { display: none; }
 
-    .tab {
-      flex: 1;
-      min-width: 80px;
-      padding: 12px 8px;
-      text-align: center;
-      font-family: 'Syne', sans-serif;
+    #quick-prompts::-webkit-scrollbar { display: none; }
+
+    .quick-btn {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
       font-size: 11px;
-      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .quick-btn:active { background: var(--accent-dim); }
+
+    /* INPUT BAR */
+    #input-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    #msg-input {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      min-height: 40px;
+      line-height: 1.5;
+      transition: border-color 0.15s;
+    }
+
+    #msg-input:focus { border-color: var(--border2); }
+    #msg-input::placeholder { color: var(--text3); }
+
+    #send-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      width: 40px; height: 40px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+
+    #send-btn:disabled { opacity: 0.3; cursor: default; }
+    #send-btn:active { opacity: 0.8; }
+
+    /* SIDEBAR / DATA PANEL */
+    #panel {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 50;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #panel.open { transform: translateX(0); }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* PANEL TABS */
+    .panel-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ptab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--text3);
       cursor: pointer;
       border-bottom: 2px solid transparent;
-      transition: all 0.15s;
-      white-space: nowrap;
     }
 
-    .tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
+    .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* CONTENT */
-    .content { padding: 0 0 80px 0; }
-
-    .section { display: none; }
-    .section.active { display: block; }
-
-    /* METRIC CARDS */
-    .metrics {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .metric {
-      background: var(--bg);
-      padding: 20px 16px;
-    }
-
-    .metric-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .metric-label {
-      font-size: 10px;
-      color: var(--text3);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-top: 6px;
-    }
-
-    .metric-val.green { color: var(--green); }
-    .metric-val.yellow { color: var(--accent); }
-    .metric-val.red { color: var(--red); }
-    .metric-val.blue { color: var(--accent3); }
-
-    /* LIST ITEMS */
-    .list-header {
-      padding: 16px 20px 8px;
-      font-size: 10px;
-      color: var(--text3);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .item {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-
-    .item:active { background: var(--bg2); }
-
-    .item-left { flex: 1; min-width: 0; }
-
-    .item-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-sub {
-      font-size: 11px;
-      color: var(--text2);
-      margin-top: 3px;
-    }
-
-    .item-right {
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .item-amount {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .item-amount.red { color: var(--red); }
-    .item-amount.green { color: var(--green); }
-
-    /* STATUS BADGES */
-    .badge {
-      display: inline-block;
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 2px;
-      font-weight: 500;
-    }
-
-    .badge.active { background: #00e87a18; color: var(--green); border: 1px solid #00e87a30; }
-    .badge.pending { background: #c8ff0018; color: var(--accent); border: 1px solid #c8ff0030; }
-    .badge.invoiced { background: #00c8ff18; color: var(--accent3); border: 1px solid #00c8ff30; }
-    .badge.done { background: #88888818; color: var(--text3); border: 1px solid #44444430; }
-    .badge.high { background: #ff4d0018; color: var(--accent2); border: 1px solid #ff4d0030; }
-    .badge.overdue { background: #ff3b3b18; color: var(--red); border: 1px solid #ff3b3b30; }
-
-    /* PROGRESS BAR */
-    .progress-wrap {
-      height: 2px;
-      background: var(--border2);
-      border-radius: 1px;
-      margin-top: 8px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 1px;
-      transition: width 0.4s ease;
-    }
-
-    /* TASK ITEM */
-    .task-item {
+    /* DATA ROWS */
+    .data-row {
       padding: 14px 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
     }
 
-    .task-check {
-      width: 18px; height: 18px;
-      border: 1px solid var(--border2);
-      border-radius: 2px;
-      flex-shrink: 0;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px;
-      color: var(--green);
+    .data-row-left { flex: 1; min-width: 0; }
+    .data-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .data-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+
+    .badge {
+      font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 2px;
     }
+    .badge.active { background: rgba(0,232,122,0.1); color: var(--green); }
+    .badge.invoiced { background: rgba(77,166,255,0.1); color: var(--blue); }
+    .badge.done { background: rgba(100,100,100,0.1); color: var(--text3); }
+    .badge.pending { background: rgba(200,255,0,0.08); color: var(--accent); }
+    .badge.high { color: var(--red); }
 
-    .task-check.done { background: #00e87a18; border-color: #00e87a30; }
-
-    .task-body { flex: 1; min-width: 0; }
-
-    .task-title {
-      font-size: 13px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .task-title.done { text-decoration: line-through; color: var(--text3); }
-
-    .task-meta {
-      font-size: 10px;
-      color: var(--text3);
-      margin-top: 2px;
-    }
-
-    /* MODAL */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      width: 100%;
-      background: var(--bg2);
-      border-top: 1px solid var(--border2);
-      border-radius: 12px 12px 0 0;
-      padding: 20px;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-
-    .modal-handle {
-      width: 36px; height: 3px;
-      background: var(--border2);
-      border-radius: 2px;
-      margin: 0 auto 20px;
-    }
-
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .field-row {
-      margin-bottom: 14px;
-    }
-
-    .field-label {
-      font-size: 10px;
-      color: var(--text3);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .field-input, .field-select {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      padding: 10px 12px;
-      border-radius: 4px;
-      outline: none;
-      appearance: none;
-    }
-
-    .field-input:focus, .field-select:focus { border-color: var(--accent); }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-primary {
-      flex: 1;
-      background: var(--accent);
-      color: #000;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-secondary {
-      background: var(--bg3);
-      color: var(--text2);
-      font-family: 'Syne', sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 12px 16px;
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-danger {
-      background: #ff3b3b18;
-      color: var(--red);
-      font-family: 'Syne', sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 1px;
-      padding: 12px 16px;
-      border: 1px solid #ff3b3b30;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    /* FAB */
-    .fab {
-      position: fixed;
-      bottom: 24px; right: 20px;
-      width: 52px; height: 52px;
-      background: var(--accent);
-      color: #000;
-      font-size: 24px;
-      font-weight: 300;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(200,255,0,0.3);
-      z-index: 20;
-    }
-
-    /* LOADING */
-    .loading {
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--text3);
-      font-size: 11px;
-      letter-spacing: 2px;
-    }
-
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 90px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-size: 12px;
-      padding: 10px 16px;
-      border-radius: 4px;
-      opacity: 0;
-      transition: all 0.2s;
-      z-index: 200;
-      white-space: nowrap;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .toast.success { border-color: #00e87a30; color: var(--green); }
-    .toast.error { border-color: #ff3b3b30; color: var(--red); }
-
-    /* FINANCE SECTION */
-    .finance-summary {
+    .metrics-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 1px;
       background: var(--border);
       border-bottom: 1px solid var(--border);
     }
 
-    .fin-card {
+    .metric-card {
       background: var(--bg);
       padding: 16px 12px;
       text-align: center;
     }
 
-    .fin-val {
+    .metric-val {
       font-family: 'Syne', sans-serif;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: -1px;
     }
 
-    .fin-label {
+    .metric-val.green { color: var(--green); }
+    .metric-val.yellow { color: var(--accent); }
+    .metric-val.red { color: var(--red); }
+
+    .metric-label {
       font-size: 9px;
       color: var(--text3);
       letter-spacing: 1px;
@@ -555,127 +463,164 @@
       margin-top: 4px;
     }
 
-    .empty-state {
-      padding: 48px 20px;
-      text-align: center;
+    .section-label {
+      padding: 12px 20px 6px;
+      font-size: 9px;
       color: var(--text3);
-      font-size: 11px;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
+
+    .empty { padding: 32px 20px; text-align: center; color: var(--text3); font-size: 11px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: 2px;
+      opacity: 0;
+      transition: all 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok { color: var(--green); }
+    .toast.err { color: var(--red); }
   </style>
 </head>
 <body>
 
 <!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-logo">Flow</div>
+<div id="auth">
+  <div class="auth-wordmark">Flow</div>
   <div class="auth-sub">AlmostCult Labs</div>
-  <input class="auth-input" type="password" id="pin-input" placeholder="••••••" maxlength="20" />
-  <div class="auth-error" id="auth-error">incorrect password</div>
-  <button class="auth-btn" onclick="checkAuth()">Enter</button>
+  <input class="auth-input" id="pin" type="password" placeholder="password" autocomplete="off" />
+  <button class="auth-btn" onclick="doAuth()">Enter</button>
+  <div class="auth-error" id="auth-err">wrong password</div>
 </div>
 
 <!-- APP -->
 <div id="app">
   <header>
-    <div class="logo">Flow</div>
-    <div class="header-right">
-      <div class="date-tag" id="header-date"></div>
-      <button class="refresh-btn" onclick="loadAll()">↻</button>
+    <div class="wordmark">Flow<span>.</span></div>
+    <div class="header-actions">
+      <div class="status-dot" title="Connected"></div>
+      <button class="icon-btn" onclick="clearChat()" title="Clear chat">↺</button>
+      <button class="icon-btn" onclick="openPanel()" title="View data">≡</button>
     </div>
   </header>
 
-  <nav>
-    <div class="tab active" onclick="switchTab('overview')">Overview</div>
-    <div class="tab" onclick="switchTab('projects')">Projects</div>
-    <div class="tab" onclick="switchTab('tasks')">Tasks</div>
-    <div class="tab" onclick="switchTab('finances')">Finances</div>
-  </nav>
+  <div id="chat"></div>
 
-  <div class="content">
-    <!-- OVERVIEW -->
-    <div class="section active" id="sec-overview">
-      <div class="metrics" id="metrics-grid">
-        <div class="metric"><div class="spinner"></div></div>
-      </div>
-      <div class="list-header">Critical Tasks</div>
-      <div id="critical-tasks"></div>
-      <div class="list-header" style="margin-top:8px">Active Projects</div>
-      <div id="overview-projects"></div>
-    </div>
-
-    <!-- PROJECTS -->
-    <div class="section" id="sec-projects">
-      <div id="projects-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-    </div>
-
-    <!-- TASKS -->
-    <div class="section" id="sec-tasks">
-      <div id="tasks-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-    </div>
-
-    <!-- FINANCES -->
-    <div class="section" id="sec-finances">
-      <div class="finance-summary" id="fin-summary"></div>
-      <div id="finances-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-    </div>
+  <div id="quick-prompts">
+    <button class="quick-btn" onclick="quickSend('What's my total outstanding amount?')">💰 Outstanding</button>
+    <button class="quick-btn" onclick="quickSend('What are my tasks due today or tomorrow?')">📋 Due soon</button>
+    <button class="quick-btn" onclick="quickSend('Give me a full status update on all active projects')">📊 Status update</button>
+    <button class="quick-btn" onclick="quickSend('Which client owes me the most money?')">🔍 Who owes me</button>
+    <button class="quick-btn" onclick="quickSend('What should I focus on today?')">🎯 Today's focus</button>
+    <button class="quick-btn" onclick="quickSend('Summarize this week for me')">📅 Week summary</button>
   </div>
 
-  <button class="fab" id="fab-btn" onclick="openAdd()">+</button>
+  <div id="input-bar">
+    <textarea id="msg-input" placeholder="Ask anything or give a command..." rows="1"></textarea>
+    <button id="send-btn" onclick="sendMsg()">↑</button>
+  </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal-content">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-title">Add</div>
-    <div id="modal-body"></div>
-    <div class="modal-actions" id="modal-actions"></div>
+<!-- DATA PANEL -->
+<div id="panel">
+  <div class="panel-header">
+    <div class="panel-title">Your Data</div>
+    <button class="icon-btn" onclick="closePanel()">✕</button>
   </div>
+  <div class="panel-tabs">
+    <div class="ptab active" onclick="switchPTab('projects')">Projects</div>
+    <div class="ptab" onclick="switchPTab('tasks')">Tasks</div>
+    <div class="ptab" onclick="switchPTab('finances')">Finances</div>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ── CONFIG ──────────────────────────────────────────────
+const PASSWORD = "almostcult";
+const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 const FIREBASE_KEY = "AIzaSyDCbo5QmuGYoqfB3lWSbk4DRJiYqBQFU7k";
 const FIRESTORE = "https://firestore.googleapis.com/v1/projects/flow-2dfcf/databases/(default)/documents";
-const PASSWORD = "almostcult";
 
-let currentTab = 'overview';
-let allProjects = [], allTasks = [], allFinances = [];
-let editingDoc = null;
+// ── STATE ────────────────────────────────────────────────
+let chatHistory = [];
+let fsData = { projects: [], tasks: [], finances: [] };
+let isThinking = false;
+let currentPTab = 'projects';
 
-// AUTH
-function checkAuth() {
-  const val = document.getElementById('pin-input').value;
-  if (val === PASSWORD) {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    sessionStorage.setItem('flow-auth', '1');
-    init();
+// ── AUTH ─────────────────────────────────────────────────
+function doAuth() {
+  if (document.getElementById('pin').value === PASSWORD) {
+    sessionStorage.setItem('flow-ok', '1');
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    boot();
   } else {
-    document.getElementById('auth-error').style.display = 'block';
-    document.getElementById('pin-input').value = '';
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('pin').value = '';
   }
 }
 
-document.getElementById('pin-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkAuth();
-});
-
-if (sessionStorage.getItem('flow-auth')) {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+document.getElementById('pin').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+if (sessionStorage.getItem('flow-ok')) {
+  document.getElementById('auth').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  boot();
 }
 
-function init() {
-  document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-  loadAll();
+// ── BOOT ─────────────────────────────────────────────────
+async function boot() {
+  autoResize();
+  await loadFirestore();
+  greet();
 }
 
-// DATA
-async function firestoreGet(collection) {
-  const res = await fetch(`${FIRESTORE}/${collection}?key=${FIREBASE_KEY}&pageSize=100`);
+function greet() {
+  const hour = new Date().getHours();
+  const greetings = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const active = fsData.projects.filter(p => p.status === 'active').length;
+  const today = new Date().toISOString().split('T')[0];
+  const dueToday = fsData.tasks.filter(t => t.due === today && t.status !== 'done').length;
+  const outstanding = fsData.projects.reduce((s, p) => s + (parseFloat(p.pending) || 0), 0);
+
+  addMsg('ai', `${greetings}, Aditya.\n\n` +
+    `Here's where things stand:\n` +
+    `— ${active} active project${active !== 1 ? 's' : ''}\n` +
+    `— ${dueToday} task${dueToday !== 1 ? 's' : ''} due today\n` +
+    `— ₹${outstanding.toLocaleString('en-IN')} outstanding\n\n` +
+    `What do you want to work on?`);
+}
+
+// ── FIRESTORE ─────────────────────────────────────────────
+async function loadFirestore() {
+  try {
+    const [p, t, f] = await Promise.all([
+      fsGet('projects'), fsGet('tasks'), fsGet('finances')
+    ]);
+    fsData = { projects: p, tasks: t, finances: f };
+  } catch(e) {
+    addMsg('system', '⚠ Could not load data from Firestore.');
+  }
+}
+
+async function fsGet(col) {
+  const res = await fetch(`${FIRESTORE}/${col}?key=${FIREBASE_KEY}&pageSize=100`);
   const data = await res.json();
   if (!data.documents) return [];
   return data.documents.map(doc => {
@@ -688,333 +633,314 @@ async function firestoreGet(collection) {
   });
 }
 
-async function firestoreSet(collection, id, fields) {
+async function fsWrite(col, id, fields) {
   const fsFields = {};
   for (const [k, v] of Object.entries(fields)) {
     fsFields[k] = { stringValue: String(v) };
   }
   const mask = Object.keys(fields).map(k => `updateMask.fieldPaths=${k}`).join('&');
   const url = id
-    ? `${FIRESTORE}/${collection}/${id}?${mask}&key=${FIREBASE_KEY}`
-    : `${FIRESTORE}/${collection}?documentId=${Date.now()}&key=${FIREBASE_KEY}`;
-  const method = id ? 'PATCH' : 'POST';
+    ? `${FIRESTORE}/${col}/${id}?${mask}&key=${FIREBASE_KEY}`
+    : `${FIRESTORE}/${col}?documentId=doc_${Date.now()}&key=${FIREBASE_KEY}`;
   const res = await fetch(url, {
-    method,
+    method: id ? 'PATCH' : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: fsFields })
   });
   return res.json();
 }
 
-async function firestoreDelete(collection, id) {
-  await fetch(`${FIRESTORE}/${collection}/${id}?key=${FIREBASE_KEY}`, { method: 'DELETE' });
+async function fsDelete(col, id) {
+  await fetch(`${FIRESTORE}/${col}/${id}?key=${FIREBASE_KEY}`, { method: 'DELETE' });
 }
 
-async function loadAll() {
+// ── CLAUDE ────────────────────────────────────────────────
+function buildSystemPrompt() {
+  const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return `You are Flow, a personal AI agent for Aditya Rahul — a freelance filmmaker and cinematographer operating under AlmostCult Labs based in Delhi, India.
+
+Today is ${today}.
+
+Your job is to help Aditya manage his work: projects, tasks, clients, and finances. You have full read and write access to his Firestore database.
+
+## Current Data
+
+### PROJECTS
+${JSON.stringify(fsData.projects, null, 2)}
+
+### TASKS
+${JSON.stringify(fsData.tasks, null, 2)}
+
+### FINANCES
+${JSON.stringify(fsData.finances, null, 2)}
+
+## Your Capabilities
+You can:
+- Answer questions about his data (outstanding amounts, overdue tasks, project status)
+- Analyze and give insights (who owes the most, what's urgent, weekly summaries)
+- Perform actions by including a JSON command block in your response
+
+## Actions
+When you need to create, update, or delete data, include a JSON block at the END of your response in this exact format:
+
+<action>
+{"op":"update","collection":"projects","id":"DOC_ID","fields":{"status":"invoice sent"}}
+</action>
+
+<action>
+{"op":"create","collection":"tasks","fields":{"title":"Edit Kinuav reel","priority":"high","due":"2026-04-25","status":"pending","project":"Kinuav"}}
+</action>
+
+<action>
+{"op":"delete","collection":"tasks","id":"DOC_ID"}
+</action>
+
+You can include multiple <action> blocks. Always explain what you're doing in plain language first, then include the action blocks.
+
+## Personality
+- Concise, direct, no fluff
+- Talk like a sharp colleague, not a chatbot
+- Use Indian currency format (₹) 
+- Dates in DD MMM format
+- When amounts are large, show in lakhs if appropriate
+- Don't repeat data back verbatim — synthesize and give insight`;
+}
+
+async function sendToClaude(userMsg) {
+  chatHistory.push({ role: 'user', content: userMsg });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 1000,
+      system: buildSystemPrompt(),
+      messages: chatHistory
+    })
+  });
+
+  const data = await res.json();
+  const rawText = data.content?.[0]?.text || 'Something went wrong.';
+
+  // Parse and execute actions
+  const actionMatches = [...rawText.matchAll(/<action>([\s\S]*?)<\/action>/g)];
+  const cleanText = rawText.replace(/<action>[\s\S]*?<\/action>/g, '').trim();
+
+  chatHistory.push({ role: 'assistant', content: rawText });
+
+  // Execute actions
+  let actionsExecuted = [];
+  for (const match of actionMatches) {
+    try {
+      const cmd = JSON.parse(match[1].trim());
+      if (cmd.op === 'update') {
+        await fsWrite(cmd.collection, cmd.id, cmd.fields);
+        actionsExecuted.push(`Updated ${cmd.collection}/${cmd.id}`);
+      } else if (cmd.op === 'create') {
+        await fsWrite(cmd.collection, null, cmd.fields);
+        actionsExecuted.push(`Created in ${cmd.collection}`);
+      } else if (cmd.op === 'delete') {
+        await fsDelete(cmd.collection, cmd.id);
+        actionsExecuted.push(`Deleted ${cmd.collection}/${cmd.id}`);
+      }
+    } catch(e) {
+      actionsExecuted.push(`Action failed: ${e.message}`);
+    }
+  }
+
+  // Reload data if actions were taken
+  if (actionsExecuted.length > 0) {
+    await loadFirestore();
+    renderPanelContent();
+  }
+
+  return { text: cleanText, actions: actionsExecuted };
+}
+
+// ── CHAT UI ───────────────────────────────────────────────
+function addMsg(role, text, actions = []) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const roleLabel = role === 'user' ? 'You' : role === 'ai' ? 'Flow' : '';
+  div.innerHTML = `
+    ${roleLabel ? `<div class="msg-role">${roleLabel}</div>` : ''}
+    <div class="msg-bubble">${escHtml(text)}</div>
+    ${actions.length ? `<div class="action-card"><div class="action-title">Actions taken</div>${actions.map(a => `<div>→ ${escHtml(a)}</div>`).join('')}</div>` : ''}
+  `;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-role">Flow</div><div class="typing"><span></span><span></span><span></span></div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('typing-indicator')?.remove();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function sendMsg() {
+  if (isThinking) return;
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  isThinking = true;
+  document.getElementById('send-btn').disabled = true;
+
+  addMsg('user', text);
+  showTyping();
+
   try {
-    [allProjects, allTasks, allFinances] = await Promise.all([
-      firestoreGet('projects'),
-      firestoreGet('tasks'),
-      firestoreGet('finances')
-    ]);
-    renderOverview();
-    renderProjects();
-    renderTasks();
-    renderFinances();
+    const { text: reply, actions } = await sendToClaude(text);
+    hideTyping();
+    addMsg('ai', reply, actions);
+    if (actions.length) toast('Data updated', 'ok');
   } catch(e) {
-    toast('Failed to load data', 'error');
+    hideTyping();
+    addMsg('system', '⚠ Failed to reach Claude. Check your connection.');
+  }
+
+  isThinking = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function quickSend(text) {
+  document.getElementById('msg-input').value = text;
+  sendMsg();
+}
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chat').innerHTML = '';
+  greet();
+}
+
+// Auto resize textarea
+function autoResize() {
+  const input = document.getElementById('msg-input');
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
+    }
+  });
+}
+
+// ── PANEL ─────────────────────────────────────────────────
+function openPanel() {
+  document.getElementById('panel').classList.add('open');
+  renderPanelContent();
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+}
+
+function switchPTab(tab) {
+  currentPTab = tab;
+  document.querySelectorAll('.ptab').forEach((el, i) => {
+    el.classList.toggle('active', ['projects','tasks','finances'][i] === tab);
+  });
+  renderPanelContent();
+}
+
+function renderPanelContent() {
+  const body = document.getElementById('panel-body');
+  if (currentPTab === 'projects') {
+    const outstanding = fsData.projects.reduce((s,p) => s + (parseFloat(p.pending)||0), 0);
+    const active = fsData.projects.filter(p => p.status === 'active').length;
+    body.innerHTML = `
+      <div class="metrics-row">
+        <div class="metric-card"><div class="metric-val yellow">${active}</div><div class="metric-label">Active</div></div>
+        <div class="metric-card"><div class="metric-val yellow">₹${(outstanding/1000).toFixed(0)}k</div><div class="metric-label">Pending</div></div>
+        <div class="metric-card"><div class="metric-val">${fsData.projects.length}</div><div class="metric-label">Total</div></div>
+      </div>
+      ${fsData.projects.map(p => `
+        <div class="data-row">
+          <div class="data-row-left">
+            <div class="data-name">${p.client || '—'}</div>
+            <div class="data-sub">${p.project || ''}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="data-val">₹${parseFloat(p.pending||0).toLocaleString('en-IN')}</div>
+            <span class="badge ${p.status === 'active' ? 'active' : p.status === 'invoice sent' ? 'invoiced' : p.status === 'done' ? 'done' : 'pending'}">${p.status||'—'}</span>
+          </div>
+        </div>`).join('') || '<div class="empty">No projects</div>'}`;
+
+  } else if (currentPTab === 'tasks') {
+    const today = new Date().toISOString().split('T')[0];
+    const pending = fsData.tasks.filter(t => t.status !== 'done');
+    const done = fsData.tasks.filter(t => t.status === 'done');
+    body.innerHTML = `
+      <div class="section-label">Pending (${pending.length})</div>
+      ${pending.map(t => {
+        const overdue = t.due && t.due < today;
+        return `<div class="data-row">
+          <div class="data-row-left">
+            <div class="data-name">${t.title||'—'}</div>
+            <div class="data-sub" style="${overdue?'color:var(--red)':''}">${t.due||''} ${t.project ? '· '+t.project : ''}</div>
+          </div>
+          ${t.priority==='high' ? '<span class="badge high">high</span>' : ''}
+        </div>`;
+      }).join('') || '<div class="empty">No pending tasks</div>'}
+      <div class="section-label">Done (${done.length})</div>
+      ${done.map(t => `<div class="data-row" style="opacity:0.4">
+        <div class="data-name" style="text-decoration:line-through">${t.title||'—'}</div>
+      </div>`).join('')}`;
+
+  } else if (currentPTab === 'finances') {
+    const received = fsData.finances.filter(f=>f.type==='received').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
+    const pending = fsData.finances.filter(f=>f.type==='pending').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
+    const expense = fsData.finances.filter(f=>f.type==='expense').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
+    body.innerHTML = `
+      <div class="metrics-row">
+        <div class="metric-card"><div class="metric-val green">₹${(received/1000).toFixed(0)}k</div><div class="metric-label">In</div></div>
+        <div class="metric-card"><div class="metric-val yellow">₹${(pending/1000).toFixed(0)}k</div><div class="metric-label">Pending</div></div>
+        <div class="metric-card"><div class="metric-val red">₹${(expense/1000).toFixed(0)}k</div><div class="metric-label">Out</div></div>
+      </div>
+      ${fsData.finances.map(f => `
+        <div class="data-row">
+          <div class="data-row-left">
+            <div class="data-name">${f.name||'—'}</div>
+            <div class="data-sub">${f.bank||''}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="data-val" style="color:${f.type==='received'?'var(--green)':f.type==='expense'?'var(--red)':'var(--accent)'}">₹${parseFloat(f.amount||0).toLocaleString('en-IN')}</div>
+            <span class="badge ${f.type==='received'?'active':f.type==='expense'?'':'pending'}">${f.type||''}</span>
+          </div>
+        </div>`).join('') || '<div class="empty">No transactions</div>'}`;
   }
 }
 
-// RENDER OVERVIEW
-function renderOverview() {
-  const active = allProjects.filter(p => p.status === 'active').length;
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-  const dueToday = allTasks.filter(t => t.due === today && t.status !== 'done').length;
-  const dueTomorrow = allTasks.filter(t => t.due === tomorrow && t.status !== 'done').length;
-  const totalPending = allProjects.reduce((s, p) => s + (parseFloat(p.pending) || 0), 0);
-
-  document.getElementById('metrics-grid').innerHTML = `
-    <div class="metric"><div class="metric-val yellow">${active}</div><div class="metric-label">Active Projects</div></div>
-    <div class="metric"><div class="metric-val ${dueToday > 0 ? 'red' : 'green'}">${dueToday}</div><div class="metric-label">Due Today</div></div>
-    <div class="metric"><div class="metric-val blue">${dueTomorrow}</div><div class="metric-label">Due Tomorrow</div></div>
-    <div class="metric"><div class="metric-val yellow">₹${(totalPending/1000).toFixed(0)}k</div><div class="metric-label">Outstanding</div></div>
-  `;
-
-  const critical = allTasks.filter(t => (t.priority === 'high' || t.due === today) && t.status !== 'done').slice(0, 5);
-  document.getElementById('critical-tasks').innerHTML = critical.length
-    ? critical.map(t => taskRow(t)).join('')
-    : '<div class="empty-state">No critical tasks</div>';
-
-  const activeProjects = allProjects.filter(p => p.status === 'active').slice(0, 4);
-  document.getElementById('overview-projects').innerHTML = activeProjects.length
-    ? activeProjects.map(p => projectRow(p)).join('')
-    : '<div class="empty-state">No active projects</div>';
-}
-
-function renderProjects() {
-  document.getElementById('projects-list').innerHTML = allProjects.length
-    ? allProjects.map(p => projectRow(p)).join('')
-    : '<div class="empty-state">No projects</div>';
-}
-
-function renderTasks() {
-  const sorted = [...allTasks].sort((a, b) => {
-    if (a.status === 'done' && b.status !== 'done') return 1;
-    if (a.status !== 'done' && b.status === 'done') return -1;
-    return (a.due || '').localeCompare(b.due || '');
-  });
-  document.getElementById('tasks-list').innerHTML = sorted.length
-    ? sorted.map(t => taskRow(t)).join('')
-    : '<div class="empty-state">No tasks</div>';
-}
-
-function renderFinances() {
-  const received = allFinances.filter(f => f.type === 'received').reduce((s, f) => s + (parseFloat(f.amount) || 0), 0);
-  const pending = allFinances.filter(f => f.type === 'pending').reduce((s, f) => s + (parseFloat(f.amount) || 0), 0);
-  const expense = allFinances.filter(f => f.type === 'expense').reduce((s, f) => s + (parseFloat(f.amount) || 0), 0);
-
-  document.getElementById('fin-summary').innerHTML = `
-    <div class="fin-card"><div class="fin-val green">₹${(received/1000).toFixed(0)}k</div><div class="fin-label">Received</div></div>
-    <div class="fin-card"><div class="fin-val yellow">₹${(pending/1000).toFixed(0)}k</div><div class="fin-label">Pending</div></div>
-    <div class="fin-card"><div class="fin-val red">₹${(expense/1000).toFixed(0)}k</div><div class="fin-label">Expenses</div></div>
-  `;
-
-  document.getElementById('finances-list').innerHTML = allFinances.length
-    ? allFinances.map(f => finRow(f)).join('')
-    : '<div class="empty-state">No transactions</div>';
-}
-
-// ROW TEMPLATES
-function projectRow(p) {
-  const pct = p.total ? Math.round(((parseFloat(p.total) - parseFloat(p.pending || 0)) / parseFloat(p.total)) * 100) : 0;
-  const statusClass = { active: 'active', 'invoice sent': 'invoiced', done: 'done', pending: 'pending' }[p.status] || 'pending';
-  return `<div class="item" onclick="editProject('${p.id}')">
-    <div class="item-left">
-      <div class="item-name">${p.client || '—'}</div>
-      <div class="item-sub">${p.project || ''}</div>
-      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
-    </div>
-    <div class="item-right">
-      <div class="item-amount">₹${parseFloat(p.pending || 0).toLocaleString('en-IN')}</div>
-      <div style="margin-top:4px"><span class="badge ${statusClass}">${p.status || 'pending'}</span></div>
-    </div>
-  </div>`;
-}
-
-function taskRow(t) {
-  const done = t.status === 'done';
-  const today = new Date().toISOString().split('T')[0];
-  const overdue = t.due && t.due < today && !done;
-  return `<div class="task-item">
-    <div class="task-check ${done ? 'done' : ''}" onclick="toggleTask('${t.id}', '${t.status}')">${done ? '✓' : ''}</div>
-    <div class="task-body" onclick="editTask('${t.id}')">
-      <div class="task-title ${done ? 'done' : ''}">${t.title || '—'}</div>
-      <div class="task-meta">
-        ${t.project ? t.project + ' · ' : ''}
-        ${t.due ? `<span style="color:${overdue ? 'var(--red)' : 'inherit'}">${t.due}</span>` : ''}
-        ${t.priority === 'high' ? ' · <span style="color:var(--accent2)">high</span>' : ''}
-      </div>
-    </div>
-  </div>`;
-}
-
-function finRow(f) {
-  const colors = { received: 'green', expense: 'red', pending: '' };
-  return `<div class="item" onclick="editFinance('${f.id}')">
-    <div class="item-left">
-      <div class="item-name">${f.name || '—'}</div>
-      <div class="item-sub">${f.bank || ''}</div>
-    </div>
-    <div class="item-right">
-      <div class="item-amount ${colors[f.type] || ''}">₹${parseFloat(f.amount || 0).toLocaleString('en-IN')}</div>
-      <div style="margin-top:4px"><span class="badge ${f.type === 'received' ? 'active' : f.type === 'expense' ? 'overdue' : 'pending'}">${f.type || ''}</span></div>
-    </div>
-  </div>`;
-}
-
-// TABS
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', ['overview','projects','tasks','finances'][i] === tab);
-  });
-  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-  document.getElementById(`sec-${tab}`).classList.add('active');
-}
-
-// TASK TOGGLE
-async function toggleTask(id, status) {
-  const newStatus = status === 'done' ? 'pending' : 'done';
-  await firestoreSet('tasks', id, { status: newStatus });
-  await loadAll();
-  toast(newStatus === 'done' ? 'Task done ✓' : 'Task reopened', 'success');
-}
-
-// MODAL
-function openModal(title, body, actions) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = body;
-  document.getElementById('modal-actions').innerHTML = actions;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('modal-overlay')) return;
-  document.getElementById('modal-overlay').classList.remove('open');
-  editingDoc = null;
-}
-
-function closeModalForce() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  editingDoc = null;
-}
-
-// ADD / EDIT
-function openAdd() {
-  editingDoc = null;
-  if (currentTab === 'projects') openProjectModal();
-  else if (currentTab === 'tasks') openTaskModal();
-  else if (currentTab === 'finances') openFinanceModal();
-  else openTaskModal();
-}
-
-function openProjectModal(p = {}) {
-  editingDoc = p.id || null;
-  openModal(
-    p.id ? 'Edit Project' : 'New Project',
-    `<div class="field-row"><div class="field-label">Client</div><input class="field-input" id="f-client" value="${p.client || ''}" placeholder="Client name" /></div>
-     <div class="field-row"><div class="field-label">Project</div><input class="field-input" id="f-project" value="${p.project || ''}" placeholder="Project description" /></div>
-     <div class="field-row"><div class="field-label">Status</div>
-       <select class="field-select" id="f-status">
-         ${['active','invoice sent','done','pending'].map(s => `<option ${p.status===s?'selected':''}>${s}</option>`).join('')}
-       </select>
-     </div>
-     <div class="field-row"><div class="field-label">Total (₹)</div><input class="field-input" id="f-total" type="number" value="${p.total || ''}" placeholder="0" /></div>
-     <div class="field-row"><div class="field-label">Pending (₹)</div><input class="field-input" id="f-pending" type="number" value="${p.pending || ''}" placeholder="0" /></div>
-     <div class="field-row"><div class="field-label">Notes</div><input class="field-input" id="f-notes" value="${p.notes || ''}" placeholder="Optional notes" /></div>`,
-    `<button class="btn-secondary" onclick="closeModalForce()">Cancel</button>
-     ${p.id ? `<button class="btn-danger" onclick="deleteDoc('projects','${p.id}')">Delete</button>` : ''}
-     <button class="btn-primary" onclick="saveProject()">Save</button>`
-  );
-}
-
-async function saveProject() {
-  const fields = {
-    client: document.getElementById('f-client').value,
-    project: document.getElementById('f-project').value,
-    status: document.getElementById('f-status').value,
-    total: document.getElementById('f-total').value,
-    pending: document.getElementById('f-pending').value,
-    notes: document.getElementById('f-notes').value,
-  };
-  await firestoreSet('projects', editingDoc, fields);
-  closeModalForce();
-  await loadAll();
-  toast('Project saved', 'success');
-}
-
-function editProject(id) {
-  const p = allProjects.find(x => x.id === id);
-  if (p) openProjectModal(p);
-}
-
-function openTaskModal(t = {}) {
-  editingDoc = t.id || null;
-  openModal(
-    t.id ? 'Edit Task' : 'New Task',
-    `<div class="field-row"><div class="field-label">Title</div><input class="field-input" id="f-title" value="${t.title || ''}" placeholder="Task title" /></div>
-     <div class="field-row"><div class="field-label">Project</div><input class="field-input" id="f-tproject" value="${t.project || ''}" placeholder="Related project" /></div>
-     <div class="field-row"><div class="field-label">Priority</div>
-       <select class="field-select" id="f-priority">
-         ${['normal','high'].map(s => `<option ${t.priority===s?'selected':''}>${s}</option>`).join('')}
-       </select>
-     </div>
-     <div class="field-row"><div class="field-label">Due Date</div><input class="field-input" id="f-due" type="date" value="${t.due || ''}" /></div>
-     <div class="field-row"><div class="field-label">Status</div>
-       <select class="field-select" id="f-tstatus">
-         ${['pending','in progress','done'].map(s => `<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
-       </select>
-     </div>`,
-    `<button class="btn-secondary" onclick="closeModalForce()">Cancel</button>
-     ${t.id ? `<button class="btn-danger" onclick="deleteDoc('tasks','${t.id}')">Delete</button>` : ''}
-     <button class="btn-primary" onclick="saveTask()">Save</button>`
-  );
-}
-
-async function saveTask() {
-  const fields = {
-    title: document.getElementById('f-title').value,
-    project: document.getElementById('f-tproject').value,
-    priority: document.getElementById('f-priority').value,
-    due: document.getElementById('f-due').value,
-    status: document.getElementById('f-tstatus').value,
-  };
-  await firestoreSet('tasks', editingDoc, fields);
-  closeModalForce();
-  await loadAll();
-  toast('Task saved', 'success');
-}
-
-function editTask(id) {
-  const t = allTasks.find(x => x.id === id);
-  if (t) openTaskModal(t);
-}
-
-function openFinanceModal(f = {}) {
-  editingDoc = f.id || null;
-  openModal(
-    f.id ? 'Edit Transaction' : 'New Transaction',
-    `<div class="field-row"><div class="field-label">Name</div><input class="field-input" id="f-fname" value="${f.name || ''}" placeholder="Description" /></div>
-     <div class="field-row"><div class="field-label">Type</div>
-       <select class="field-select" id="f-ftype">
-         ${['received','pending','expense'].map(s => `<option ${f.type===s?'selected':''}>${s}</option>`).join('')}
-       </select>
-     </div>
-     <div class="field-row"><div class="field-label">Amount (₹)</div><input class="field-input" id="f-famount" type="number" value="${f.amount || ''}" placeholder="0" /></div>
-     <div class="field-row"><div class="field-label">Bank / Note</div><input class="field-input" id="f-fbank" value="${f.bank || ''}" placeholder="HDFC / note" /></div>`,
-    `<button class="btn-secondary" onclick="closeModalForce()">Cancel</button>
-     ${f.id ? `<button class="btn-danger" onclick="deleteDoc('finances','${f.id}')">Delete</button>` : ''}
-     <button class="btn-primary" onclick="saveFinance()">Save</button>`
-  );
-}
-
-async function saveFinance() {
-  const fields = {
-    name: document.getElementById('f-fname').value,
-    type: document.getElementById('f-ftype').value,
-    amount: document.getElementById('f-famount').value,
-    bank: document.getElementById('f-fbank').value,
-  };
-  await firestoreSet('finances', editingDoc, fields);
-  closeModalForce();
-  await loadAll();
-  toast('Transaction saved', 'success');
-}
-
-function editFinance(id) {
-  const f = allFinances.find(x => x.id === id);
-  if (f) openFinanceModal(f);
-}
-
-async function deleteDoc(collection, id) {
-  await firestoreDelete(collection, id);
-  closeModalForce();
-  await loadAll();
-  toast('Deleted', 'success');
-}
-
-// TOAST
-function toast(msg, type = '') {
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg, type='') {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = `toast ${type} show`;
   setTimeout(() => el.classList.remove('show'), 2500);
 }
-
-// INIT
-if (sessionStorage.getItem('flow-auth')) init();
 </script>
 </body>
 </html>
