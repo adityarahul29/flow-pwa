@@ -742,6 +742,8 @@ async function sendToClaude(userMsg) {
   });
 
   const data = await res.json();
+  console.log('Claude response:', JSON.stringify(data));
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   const rawText = data.content?.[0]?.text || 'Something went wrong.';
 
   // Parse and execute actions
