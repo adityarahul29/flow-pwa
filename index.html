@@ -130,7 +130,6 @@
   <div class="auth-sub">AlmostCult Labs</div>
   <input class="auth-input" id="pin" type="password" placeholder="password" autocomplete="off" />
   <button class="auth-btn" onclick="doAuth()">Enter</button>
-  <button class="auth-faceid" id="faceid-btn" onclick="doFaceID()" style="display:none">&#11109; Use Face ID</button>
   <div class="auth-error" id="auth-err">wrong password</div>
 </div>
 <div id="app">
@@ -190,21 +189,6 @@ let chatHistory=JSON.parse(sessionStorage.getItem('flow-chat-history')||'[]');
 let fsData={projects:[],tasks:[],finances:[],fitness:[],thoughts:[]};
 let isThinking=false,currentPTab='tasks';
 
-async function doFaceID(){
-  try{
-    const stored=localStorage.getItem('flow-passkey-id');
-    const challenge=new Uint8Array(32);crypto.getRandomValues(challenge);
-    if(stored){
-      await navigator.credentials.get({publicKey:{challenge,allowCredentials:[{id:Uint8Array.from(atob(stored),c=>c.charCodeAt(0)),type:'public-key'}],userVerification:'required',timeout:30000}});
-      authSuccess();
-    } else {
-      const userId=new Uint8Array(16);crypto.getRandomValues(userId);
-      const cred=await navigator.credentials.create({publicKey:{challenge,rp:{name:'Flow',id:location.hostname},user:{id:userId,name:'aditya',displayName:'Aditya'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:30000}});
-      localStorage.setItem('flow-passkey-id',btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
-      authSuccess();
-    }
-  }catch(e){toast('Face ID failed','err');}
-}
 function doAuth(){
   if(document.getElementById('pin').value===PASSWORD){authSuccess();}
   else{document.getElementById('auth-err').style.display='block';document.getElementById('pin').value='';}
@@ -217,7 +201,6 @@ function authSuccess(){
 }
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('pin').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
-  if(window.PublicKeyCredential){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(ok=>{if(ok)document.getElementById('faceid-btn').style.display='block';});}
   if(sessionStorage.getItem('flow-ok')){document.getElementById('auth').style.display='none';document.getElementById('app').style.display='flex';boot();}
 });
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sessionStorage.getItem('flow-ok'))loadAll();});
