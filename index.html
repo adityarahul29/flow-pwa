@@ -149,7 +149,7 @@
     /* FITNESS QUICK LOG */
     #fitness-fab{width:40px;height:40px;background:var(--bg2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .2s;flex-shrink:0;position:relative}
     #fitness-fab:active{transform:scale(.93)}
-    #fitness-fab .fab-ring{position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);border-right-color:var(--green);animation:spin 2s linear infinite;opacity:.4}
+    @keyframes blink-btn{0%,100%{opacity:1}50%{opacity:.2}}
     .signal-tag{display:inline-block;font-size:9px;letter-spacing:1px;padding:2px 7px;background:var(--bg3);border:1px solid var(--border2);border-radius:2px;color:var(--text3);margin-right:4px;margin-top:4px}
   </style>
 </head>
@@ -167,7 +167,6 @@
       <div class="wordmark" onclick="openDrawer()" style="cursor:pointer">Flow<span>.</span></div>
     </div>
     <div class="header-actions">
-      <div id="refresh-spinner" style="display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div>
       <div class="status-dot" id="status-dot"></div>
       <button class="icon-btn" onclick="clearChat()">&#8635;</button>
       <button class="icon-btn" onclick="openPanel('tasks')">&#9776;</button>
@@ -184,7 +183,6 @@
   </div>
   <div id="input-bar">
     <div id="fitness-fab" onclick="openPanel('fitness')" title="Log fitness" style="position:static;width:40px;height:40px;box-shadow:none;flex-shrink:0">
-      <div class="fab-ring"></div>
       💪
     </div>
     <textarea id="msg-input" placeholder="Ask anything or give a command..." rows="1"></textarea>
@@ -197,7 +195,7 @@
   <div id="drawer-overlay" onclick="closeDrawer()"></div>
   <div id="drawer-menu">
     <div class="drawer-top">
-      <div class="drawer-wordmark">Flow<span>.</span></div>
+      <div class="drawer-wordmark">State<span>.</span></div>
       <div class="drawer-sub">AlmostCult Labs</div>
     </div>
     <div class="drawer-nav">
@@ -249,8 +247,8 @@
   <div class="panel-tabs">
     <div class="ptab active" onclick="switchPTab('tasks')">Tasks</div>
     <div class="ptab" onclick="switchPTab('projects')">Projects</div>
+    <div class="ptab" onclick="switchPTab('fitness')">Fitness</div>
     <div class="ptab" onclick="switchPTab('finances')">Finances</div>
-    <div class="ptab" onclick="switchPTab('fitness')" id="ptab-fitness" style="display:none">Fitness</div>
     <div class="ptab" onclick="switchPTab('signal')" id="ptab-signal" style="display:none">Signal</div>
     <div class="ptab" onclick="switchPTab('history')" id="ptab-history" style="display:none">History</div>
   </div>
@@ -440,7 +438,7 @@ function autoResize(){
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 }
 function openPanel(tab){
-  const hiddenTabs = ['fitness','signal','history'];
+  const hiddenTabs = ['signal','history'];
   hiddenTabs.forEach(t => {
     const el = document.getElementById(`ptab-${t}`);
     if(el) el.style.display = t === tab ? '' : 'none';
@@ -448,7 +446,7 @@ function openPanel(tab){
   if(tab){
     currentPTab=tab;
     document.querySelectorAll('.ptab').forEach((el,i)=>{
-      el.classList.toggle('active',['tasks','projects','finances','fitness','signal','history'][i]===tab);
+      el.classList.toggle('active',['tasks','projects','fitness','finances','signal','history'][i]===tab);
     });
     const titles = {tasks:'Tasks',projects:'Projects',finances:'Finances',fitness:'Fitness',signal:'Signal',history:'History'};
     const titleEl = document.getElementById('panel-title');
@@ -459,8 +457,8 @@ function openPanel(tab){
 }
 function closePanel(){document.getElementById('panel').classList.remove('open');}
 
-function showRefreshSpinner(){const s=document.getElementById('refresh-spinner');const d=document.getElementById('status-dot');if(s)s.style.display='block';if(d)d.style.display='none';}
-function hideRefreshSpinner(){const s=document.getElementById('refresh-spinner');const d=document.getElementById('status-dot');if(s)s.style.display='none';if(d)d.style.display='block';}
+function showRefreshSpinner(){const btn=document.querySelector('.icon-btn[onclick="clearChat()"]');if(btn)btn.style.animation='blink-btn .6s ease infinite';}
+function hideRefreshSpinner(){const btn=document.querySelector('.icon-btn[onclick="clearChat()"]');if(btn)btn.style.animation='';}
 
 function openDrawer(){document.getElementById('drawer').classList.add('open');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');}
@@ -486,10 +484,10 @@ function updateDrawerBadges(){
 }
 function switchPTab(tab){
   currentPTab=tab;
-  document.querySelectorAll('.ptab').forEach((el,i)=>{el.classList.toggle('active',['tasks','projects','finances','fitness','signal','history'][i]===tab);});
+  document.querySelectorAll('.ptab').forEach((el,ii)=>{el.classList.toggle('active',['tasks','projects','fitness','finances','signal','history'][ii]===tab);});
+  const titles={tasks:'Tasks',projects:'Projects',finances:'Finances',fitness:'Fitness',signal:'Signal',history:'History'};
+  const titleEl=document.getElementById('panel-title');if(titleEl)titleEl.textContent=titles[tab]||'Data';
   renderPanelContent();
-}
-function getBadge(status){
   if(!status)return'pending';const s=status.toLowerCase();
   if(s.includes('progress')||s==='active')return'active';
   if(s.includes('invoice'))return'invoiced';
