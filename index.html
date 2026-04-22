@@ -892,13 +892,14 @@ function switchPTab(tab) {
 
 function renderPanelContent() {
   const body = document.getElementById('panel-body');
+  const summary = fsData.finances.find(f => f.id === 'summary') || {};
   if (currentPTab === 'projects') {
-    const outstanding = fsData.projects.reduce((s,p) => s + (parseFloat(p.pending)||0), 0);
-    const active = fsData.projects.filter(p => p.status === 'active').length;
+    const outstanding = summary.total_outstanding || fsData.projects.reduce((s,p) => s + (parseFloat(p.pending)||0), 0);
+    const active = fsData.projects.filter(p => p.status && p.status.toLowerCase().includes('progress')).length;
     body.innerHTML = `
       <div class="metrics-row">
         <div class="metric-card"><div class="metric-val yellow">${active}</div><div class="metric-label">Active</div></div>
-        <div class="metric-card"><div class="metric-val yellow">₹${(outstanding/1000).toFixed(0)}k</div><div class="metric-label">Pending</div></div>
+        <div class="metric-card"><div class="metric-val yellow">₹${(outstanding/1000).toFixed(0)}k</div><div class="metric-label">Outstanding</div></div>
         <div class="metric-card"><div class="metric-val">${fsData.projects.length}</div><div class="metric-label">Total</div></div>
       </div>
       ${fsData.projects.map(p => `
