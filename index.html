@@ -554,7 +554,8 @@
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const PASSWORD = "almostcult";
-const CLAUDE_MODEL = "claude-sonnet-4-20250514";
+const CLAUDE_ENDPOINT = "https://api.adii.work/claude";
+const WORKER_SECRET = "almostcult";
 const FIREBASE_KEY = "AIzaSyDCbo5QmuGYoqfB3lWSbk4DRJiYqBQFU7k";
 const FIRESTORE = "https://firestore.googleapis.com/v1/projects/flow-2dfcf/databases/(default)/documents";
 
@@ -726,11 +727,14 @@ You can include multiple <action> blocks. Always explain what you're doing in pl
 async function sendToClaude(userMsg) {
   chatHistory.push({ role: 'user', content: userMsg });
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(CLAUDE_ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-secret': WORKER_SECRET
+    },
     body: JSON.stringify({
-      model: CLAUDE_MODEL,
+      model: "claude-sonnet-4-20250514",
       max_tokens: 1000,
       system: buildSystemPrompt(),
       messages: chatHistory
