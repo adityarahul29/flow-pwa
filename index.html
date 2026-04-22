@@ -147,10 +147,9 @@
     .drawer-logout{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;color:var(--text3);font-size:12px;letter-spacing:1px}
     .drawer-logout:hover{color:var(--red)}
     /* FITNESS QUICK LOG */
-    #fitness-fab{position:fixed;bottom:80px;left:16px;z-index:20;width:36px;height:36px;background:var(--bg2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .2s}
-    #fitness-fab:active{background:var(--bg3);transform:scale(.95)}
-    #fitness-fab .fab-ring{position:absolute;inset:-2px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);animation:spin .8s linear infinite;opacity:0;transition:opacity .2s}
-    #fitness-fab:hover .fab-ring{opacity:1}
+    #fitness-fab{position:fixed;bottom:88px;left:16px;z-index:20;width:48px;height:48px;background:var(--bg2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+    #fitness-fab:active{transform:scale(.93)}
+    #fitness-fab .fab-ring{position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);border-right-color:var(--green);animation:spin 2s linear infinite;opacity:.5}
     .signal-tag{display:inline-block;font-size:9px;letter-spacing:1px;padding:2px 7px;background:var(--bg3);border:1px solid var(--border2);border-radius:2px;color:var(--text3);margin-right:4px;margin-top:4px}
   </style>
 </head>
@@ -162,14 +161,14 @@
   <button class="auth-btn" onclick="doAuth()">Enter</button>
   <div class="auth-error" id="auth-err">wrong password</div>
 </div>
-<div id="app">
+  <div id="app">
   <header>
     <div style="display:flex;align-items:center;gap:12px">
-      <button class="icon-btn" onclick="openDrawer()" style="font-size:18px;border:none;background:none;color:var(--text2)">&#8801;</button>
-      <div class="wordmark">Flow<span>.</span></div>
+      <div class="wordmark" onclick="openDrawer()" style="cursor:pointer">Flow<span>.</span></div>
     </div>
     <div class="header-actions">
-      <div class="status-dot"></div>
+      <div id="refresh-spinner" style="display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div>
+      <div class="status-dot" id="status-dot"></div>
       <button class="icon-btn" onclick="clearChat()">&#8635;</button>
       <button class="icon-btn" onclick="openPanel('tasks')">&#9776;</button>
     </div>
@@ -252,9 +251,9 @@
     <div class="ptab active" onclick="switchPTab('tasks')">Tasks</div>
     <div class="ptab" onclick="switchPTab('projects')">Projects</div>
     <div class="ptab" onclick="switchPTab('finances')">Finances</div>
-    <div class="ptab" onclick="switchPTab('fitness')">Fitness</div>
-    <div class="ptab" onclick="switchPTab('signal')">Signal</div>
-    <div class="ptab" onclick="switchPTab('history')">History</div>
+    <div class="ptab" onclick="switchPTab('fitness')" id="ptab-fitness" style="display:none">Fitness</div>
+    <div class="ptab" onclick="switchPTab('signal')" id="ptab-signal" style="display:none">Signal</div>
+    <div class="ptab" onclick="switchPTab('history')" id="ptab-history" style="display:none">History</div>
   </div>
   <div class="panel-body" id="panel-body"></div>
 </div>
@@ -290,10 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('pin').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
   if(localStorage.getItem('flow-ok')){document.getElementById('auth').style.display='none';document.getElementById('app').style.display='flex';boot();}
 });
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&localStorage.getItem('flow-ok'))loadAll();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&localStorage.getItem('flow-ok')){showRefreshSpinner();loadAll().then(hideRefreshSpinner);}});
 let pullStartY=0;
 document.addEventListener('touchstart',e=>{pullStartY=e.touches[0].clientY;},{passive:true});
-document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-pullStartY>90&&localStorage.getItem('flow-ok')){loadAll();toast('Refreshed','ok');}},{passive:true});
+document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-pullStartY>90&&localStorage.getItem('flow-ok')){showRefreshSpinner();loadAll().then(hideRefreshSpinner);}},{passive:true});
 
 async function boot(){autoResize();await loadAll();restoreChat();}
 async function loadAll(){
@@ -442,11 +441,26 @@ function autoResize(){
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 }
 function openPanel(tab){
-  if(tab) { currentPTab=tab; document.querySelectorAll('.ptab').forEach((el,i)=>{el.classList.toggle('active',['tasks','projects','finances','fitness','signal','history'][i]===tab);}); }
+  const hiddenTabs = ['fitness','signal','history'];
+  hiddenTabs.forEach(t => {
+    const el = document.getElementById(`ptab-${t}`);
+    if(el) el.style.display = t === tab ? '' : 'none';
+  });
+  if(tab){
+    currentPTab=tab;
+    document.querySelectorAll('.ptab').forEach((el,i)=>{
+      el.classList.toggle('active',['tasks','projects','finances','fitness','signal','history'][i]===tab);
+    });
+    const titles = {tasks:'Tasks',projects:'Projects',finances:'Finances',fitness:'Fitness',signal:'Signal',history:'History'};
+    document.querySelector('.panel-title').textContent = titles[tab]||'Data';
+  }
   document.getElementById('panel').classList.add('open');
   renderPanelContent();
 }
 function closePanel(){document.getElementById('panel').classList.remove('open');}
+
+function showRefreshSpinner(){const s=document.getElementById('refresh-spinner');const d=document.getElementById('status-dot');if(s)s.style.display='block';if(d)d.style.display='none';}
+function hideRefreshSpinner(){const s=document.getElementById('refresh-spinner');const d=document.getElementById('status-dot');if(s)s.style.display='none';if(d)d.style.display='block';}
 
 function openDrawer(){document.getElementById('drawer').classList.add('open');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');}
@@ -525,13 +539,38 @@ function renderPanelContent(){
         <div class="metric-card"><div class="metric-val yellow">Rs${(outstanding/1000).toFixed(0)}k</div><div class="metric-label">Outstanding</div></div>
         <div class="metric-card"><div class="metric-val green">Rs${(netReceivable/1000).toFixed(0)}k</div><div class="metric-label">Net Receivable</div></div>
       </div>
-      <div class="section-label">Pending by Project</div>
-      ${projectsPending.map(p=>`<div class="data-row"><div class="data-row-left"><div class="data-name">${p.client||'—'}</div><div class="data-sub">${p.invoice||''}</div></div><div class="data-val">Rs${parseFloat(p.pending||0).toLocaleString('en-IN')}</div></div>`).join('')||'<div class="empty">No pending amounts</div>'}
-      ${raashi?`<div class="section-label">Payables</div><div class="data-row" style="background:rgba(255,64,64,.04)"><div class="data-row-left"><div class="data-name">Raashi</div><div class="data-sub">Pay after UNDP clears</div></div><div class="data-val" style="color:var(--red)">Rs${raashi.toLocaleString('en-IN')}</div></div>`:''}
-      <div class="section-label">Bank Accounts</div>
-      ${banks.map(f=>`<div class="data-row"><div class="data-row-left"><div class="data-name">${f.name||'—'}</div></div><div class="data-val" style="color:${f.balance?'var(--green)':'var(--text3)'}">Rs${(f.balance||0).toLocaleString('en-IN')}</div></div>`).join('')}
-      <div class="section-label">Credit Cards</div>
-      ${cards.map(f=>`<div class="data-row"><div class="data-row-left"><div class="data-name">${f.name||'—'}</div><div class="data-sub">${f.bank||''}</div></div><span class="badge card">card</span></div>`).join('')}`;
+
+      <div style="margin:12px 12px 4px;padding:10px 12px 4px;background:rgba(200,255,0,0.04);border:1px solid rgba(200,255,0,0.08);border-radius:6px">
+        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;opacity:.7">Pending by Project</div>
+        ${projectsPending.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,255,0,0.06)">
+          <div><div style="font-size:13px;font-weight:500">${p.client||'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${p.invoice||''}</div></div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent)">Rs${parseFloat(p.pending||0).toLocaleString('en-IN')}</div>
+        </div>`).join('')||'<div style="font-size:11px;color:var(--text3);padding:8px 0">No pending amounts</div>'}
+      </div>
+
+      ${raashi?`<div style="margin:8px 12px 4px;padding:10px 12px;background:rgba(255,64,64,0.06);border:1px solid rgba(255,64,64,0.12);border-radius:6px">
+        <div style="font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;opacity:.8">Payables</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:13px;font-weight:500">Raashi</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Pay after UNDP clears</div></div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--red)">Rs${raashi.toLocaleString('en-IN')}</div>
+        </div>
+      </div>`:''}
+
+      <div style="margin:8px 12px 4px;padding:10px 12px 4px;background:rgba(0,232,122,0.04);border:1px solid rgba(0,232,122,0.08);border-radius:6px">
+        <div style="font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;opacity:.7">Bank Accounts</div>
+        ${banks.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,232,122,0.06)">
+          <div style="font-size:13px;font-weight:500">${f.name||'—'}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:${f.balance?'var(--green)':'var(--text3)'}">Rs${(f.balance||0).toLocaleString('en-IN')}</div>
+        </div>`).join('')||'<div style="font-size:11px;color:var(--text3);padding:8px 0">No bank data</div>'}
+      </div>
+
+      <div style="margin:8px 12px 16px;padding:10px 12px 4px;background:rgba(185,124,255,0.04);border:1px solid rgba(185,124,255,0.08);border-radius:6px">
+        <div style="font-size:9px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;opacity:.7">Credit Cards</div>
+        ${cards.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(185,124,255,0.06)">
+          <div><div style="font-size:13px;font-weight:500">${f.name||'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${f.bank||''}</div></div>
+          <span class="badge card">card</span>
+        </div>`).join('')||'<div style="font-size:11px;color:var(--text3);padding:8px 0">No cards</div>'}
+      </div>`;
 
   }else if(currentPTab==='fitness'){
     const recent=[...fsData.fitness].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,14);
