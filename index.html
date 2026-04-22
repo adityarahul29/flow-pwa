@@ -934,26 +934,29 @@ function renderPanelContent() {
       </div>`).join('')}`;
 
   } else if (currentPTab === 'finances') {
+    const totalBalance = fsData.finances.filter(f=>f.type==='bank_account').reduce((s,f)=>s+(parseFloat(f.balance)||0),0);
     const received = fsData.finances.filter(f=>f.type==='received').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
-    const pending = fsData.finances.filter(f=>f.type==='pending').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
     const expense = fsData.finances.filter(f=>f.type==='expense').reduce((s,f)=>s+(parseFloat(f.amount)||0),0);
     body.innerHTML = `
       <div class="metrics-row">
-        <div class="metric-card"><div class="metric-val green">₹${(received/1000).toFixed(0)}k</div><div class="metric-label">In</div></div>
-        <div class="metric-card"><div class="metric-val yellow">₹${(pending/1000).toFixed(0)}k</div><div class="metric-label">Pending</div></div>
-        <div class="metric-card"><div class="metric-val red">₹${(expense/1000).toFixed(0)}k</div><div class="metric-label">Out</div></div>
+        <div class="metric-card"><div class="metric-val green">₹${(totalBalance/1000).toFixed(0)}k</div><div class="metric-label">Balance</div></div>
+        <div class="metric-card"><div class="metric-val yellow">₹${(received/1000).toFixed(0)}k</div><div class="metric-label">Received</div></div>
+        <div class="metric-card"><div class="metric-val red">₹${(expense/1000).toFixed(0)}k</div><div class="metric-label">Expenses</div></div>
       </div>
-      ${fsData.finances.map(f => `
-        <div class="data-row">
+      ${fsData.finances.map(f => {
+        const isBankAccount = f.type === 'bank_account';
+        const val = isBankAccount ? (parseFloat(f.balance)||0) : (parseFloat(f.amount)||0);
+        return `<div class="data-row">
           <div class="data-row-left">
             <div class="data-name">${f.name||'—'}</div>
             <div class="data-sub">${f.bank||''}</div>
           </div>
           <div style="text-align:right">
-            <div class="data-val" style="color:${f.type==='received'?'var(--green)':f.type==='expense'?'var(--red)':'var(--accent)'}">₹${parseFloat(f.amount||0).toLocaleString('en-IN')}</div>
-            <span class="badge ${f.type==='received'?'active':f.type==='expense'?'':'pending'}">${f.type||''}</span>
+            <div class="data-val" style="color:${f.type==='expense'?'var(--red)':'var(--green)'}">₹${val.toLocaleString('en-IN')}</div>
+            <span class="badge ${isBankAccount?'active':f.type==='expense'?'overdue':'pending'}">${isBankAccount?'bank':f.type||''}</span>
           </div>
-        </div>`).join('') || '<div class="empty">No transactions</div>'}`;
+        </div>`;
+      }).join('') || '<div class="empty">No transactions</div>'}`;
   }
 }
 
